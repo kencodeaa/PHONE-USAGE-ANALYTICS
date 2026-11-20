@@ -1,7 +1,7 @@
-"""Mini App Nhóm B: PHONE USAGE ANALYTICS – Màn hình thông minh, giấc ngủ an lành.
+"""Mini App Nhóm B: L2 Dev – Màn hình thông minh, giấc ngủ an lành.
 
 Bố cục hiện đại lấy cảm hứng từ giao diện Landing/Dashboard:
-- Thanh Top Navigation (Logo + Chuyển trang nhanh + Nút Khôi phục gốc / Xuất Excel)
+- Thanh Top Navigation (Logo + Chuyển trang nhanh)
 - Trang Chủ (Hero Banner + Tổng quan khảo sát + Truy cập nhanh)
 - Tự Kiểm Tra Thói Quen
 - Phân Tích Khảo Sát (Dashboard biểu đồ, 3 nhóm sử dụng, bảng dữ liệu & lọc)
@@ -15,7 +15,6 @@ from logic import (
     REQUIRED_COLUMNS,
     calculate_sleep_hours,
     create_message,
-    export_excel_workbook,
     get_default_survey_data,
     prepare_dataframe,
     summarize_dataframe,
@@ -85,8 +84,7 @@ st.markdown(
     }
 
     /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO TẤT CẢ CÁC NÚT */
-    div.stButton > button,
-    div.stDownloadButton > button {
+    div.stButton > button {
         transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
         border-radius: 10px !important;
         font-weight: 600 !important;
@@ -117,20 +115,7 @@ st.markdown(
         box-shadow: 0 8px 24px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.45) !important;
     }
 
-    /* Nút tải Excel (Đỏ nổi bật) */
-    div.stDownloadButton > button {
-        background: linear-gradient(135deg, #EF4444, #DC2626) !important;
-        border: 1px solid #F87171 !important;
-        color: #FFFFFF !important;
-    }
-    div.stDownloadButton > button:hover {
-        transform: translateY(-3px) !important;
-        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.6), 0 0 16px rgba(248, 113, 113, 0.45) !important;
-        border-color: #FCA5A5 !important;
-    }
-
-    div.stButton > button:active,
-    div.stDownloadButton > button:active {
+    div.stButton > button:active {
         transform: translateY(0px) scale(0.98) !important;
     }
 
@@ -418,7 +403,7 @@ df = st.session_state.survey_df
 summary = summarize_dataframe(df)
 
 # [3] THANH ĐIỀU HƯỚNG TRÊN CÙNG (TOP NAVBAR)
-nav_logo, nav_p1, nav_p2, nav_p3, nav_p4, nav_p5, nav_dl = st.columns([2.6, 1.15, 1.45, 1.55, 1.45, 1.35, 1.25])
+nav_logo, nav_p1, nav_p2, nav_p3, nav_p4, nav_p5 = st.columns([2.8, 1.25, 1.45, 1.65, 1.5, 1.55])
 
 with nav_logo:
     st.markdown(
@@ -449,19 +434,10 @@ for page_key, page_label, col in pages:
             go_to(page_key)
             st.rerun()
 
-with nav_dl:
-    st.download_button(
-        "📥 Xuất Excel",
-        data=export_excel_workbook(df),
-        file_name="Phone_Usage_Analytics_Lop_9B.xlsx",
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        use_container_width=True,
-    )
-
 st.write("")
 
 # ==============================================================================
-# TRANG 1: TRANG CHỦ (BỐ CỤC TƯƠNG TỰ MẪU THAM KHẢO, GIỮ NGUYÊN BẢNG MÀU)
+# TRANG 1: TRANG CHỦ
 # ==============================================================================
 if st.session_state.active_page == "Trang chủ":
     # 1. HERO BANNER 2 CỘT
@@ -506,7 +482,7 @@ if st.session_state.active_page == "Trang chủ":
     )
 
     # Hai nút hành động chính ngay dưới Hero Banner
-    cta1, cta2, cta3, _ = st.columns([1.8, 1.8, 1.5, 4.9])
+    cta1, cta2, _ = st.columns([1.9, 2.0, 6.1])
     with cta1:
         if st.button("🧭 Bắt đầu tự kiểm tra", type="primary", use_container_width=True):
             go_to("Tự kiểm tra")
@@ -515,7 +491,6 @@ if st.session_state.active_page == "Trang chủ":
         if st.button("📊 Xem phân tích khảo sát", type="secondary", use_container_width=True):
             go_to("Phân tích khảo sát")
             st.rerun()
-  
 
     st.write("")
 
@@ -616,7 +591,7 @@ if st.session_state.active_page == "Trang chủ":
             <div class="quick-card">
                 <div class="quick-icon" style="background:rgba(129,140,248,0.16); color:#818CF8;">📊</div>
                 <div class="quick-title">Phân tích khảo sát</div>
-                <div class="quick-desc">Nạp tệp Excel/CSV, xem 3 nhóm phân loại, biểu đồ trực quan và xuất báo cáo tổng hợp.</div>
+                <div class="quick-desc">Nạp tệp Excel/CSV, xem 3 nhóm phân loại, biểu đồ trực quan và tra cứu dữ liệu lớp.</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -825,44 +800,27 @@ elif st.session_state.active_page == "Phân tích khảo sát":
 
     # Hàng 3: Tải file & Bảng dữ liệu khảo sát
     st.markdown("#### ⊞ Quản lý & Tra cứu Dữ liệu Khảo sát")
-    up_col1, up_col2 = st.columns([2, 1])
-    with up_col1:
-        uploaded = st.file_uploader(
-            "Tải file Excel Nhóm B (.xlsx, .xls) hoặc CSV ẩn danh để thay thế dữ liệu phân tích",
-            type=["xlsx", "xls", "csv"],
-            key="survey_upload",
-        )
-        if uploaded is not None:
-            try:
-                raw = read_uploaded_file(uploaded)
-                prepared = prepare_dataframe(raw)
-                st.session_state.survey_df = prepared
-                st.session_state.data_source_label = f"File tải lên: {uploaded.name}"
-                df = prepared
-                issues = validate_dataframe(df)
-                if issues:
-                    st.warning("Cần rà soát dữ liệu trước khi sử dụng kết quả:")
-                    for issue in issues:
-                        st.write(f"- {issue}")
-                else:
-                    st.success(f"Đã nạp thành công {len(df)} bản ghi hợp lệ từ {uploaded.name}.")
-            except Exception as exc:
-                st.error(f"Không thể xử lý file: {exc}")
-
-    with up_col2:
-        st.markdown("**Biểu mẫu & Khôi phục**")
-        sample_csv = df[REQUIRED_COLUMNS].to_csv(index=False).encode("utf-8-sig")
-        st.download_button(
-            "⬇️ Tải file CSV mẫu (30 HS)",
-            data=sample_csv,
-            file_name="du_lieu_mo_phong_30_HS.csv",
-            mime="text/csv",
-            use_container_width=True,
-        )
-        if st.button("↺ Khôi phục 30 HS mặc định", key="reset_in_data", use_container_width=True):
-            st.session_state.survey_df = get_default_survey_data()
-            st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B (30 HS)"
-            st.rerun()
+    uploaded = st.file_uploader(
+        "Tải file Excel Nhóm B (.xlsx, .xls) hoặc CSV ẩn danh để thay thế dữ liệu phân tích",
+        type=["xlsx", "xls", "csv"],
+        key="survey_upload",
+    )
+    if uploaded is not None:
+        try:
+            raw = read_uploaded_file(uploaded)
+            prepared = prepare_dataframe(raw)
+            st.session_state.survey_df = prepared
+            st.session_state.data_source_label = f"File tải lên: {uploaded.name}"
+            df = prepared
+            issues = validate_dataframe(df)
+            if issues:
+                st.warning("Cần rà soát dữ liệu trước khi sử dụng kết quả:")
+                for issue in issues:
+                    st.write(f"- {issue}")
+            else:
+                st.success(f"Đã nạp thành công {len(df)} bản ghi hợp lệ từ {uploaded.name}.")
+        except Exception as exc:
+            st.error(f"Không thể xử lý file: {exc}")
 
     f1, f2 = st.columns([2, 1])
     with f1:
