@@ -24,7 +24,7 @@ from logic import (
 
 # [1] CẤU HÌNH TRANG & CSS TÙY CHỈNH
 st.set_page_config(
-    page_title="PHONE USAGE ANALYTICS | Màn hình thông minh – Giấc ngủ an lành",
+    page_title="Mini app nhóm B | Màn hình thông minh – Giấc ngủ an lành",
     page_icon="📱",
     layout="wide",
 )
@@ -426,8 +426,8 @@ with nav_logo:
         <div class="brand-wrap">
             <div class="brand-icon">📱</div>
             <div>
-                <div class="brand-name">PHONE USAGE</div>
-                <div class="brand-sub">SCREEN &amp; SLEEP ANALYTICS</div>
+                <div class="brand-name">$L^2$ $L^2$</div>
+                <div class="brand-sub">SCREEN &amp; SLEEP ANALYTICS • BY LONG LE</div>
             </div>
         </div>
         """,
@@ -471,11 +471,11 @@ if st.session_state.active_page == "Trang chủ":
             <div style="flex: 1.2;">
                 <div class="hero-badge">
                     <span class="hero-dot"></span>
-                    <span>Sản phẩm STEM Tin học 9 • Nhóm B (Lớp 9B)</span>
+                    <span>Sản phẩm STEM Tin học 9 • Nhóm B (Long Le)</span>
                 </div>
-                <h1 class="hero-heading">SMART SCREEN.<br><span>RESTFUL SLEEP.</span></h1>
+                <h1 class="hero-heading">LÀM CHỦ MÀN HÌNH.<br><span>CHĂM SÓC GIẤC NGỦ.</span></h1>
                 <p class="hero-desc">
-                    <b>PHONE USAGE ANALYTICS</b> giúp học sinh phân tích dữ liệu khảo sát ẩn danh về thời gian sử dụng
+                    <b>Mini app này</b> giúp học sinh phân tích dữ liệu khảo sát ẩn danh về thời gian sử dụng
                     điện thoại và giấc ngủ. Giảm màn hình trước ngủ – nâng cao chất lượng nghỉ ngơi mỗi ngày.
                 </p>
             </div>
@@ -515,11 +515,7 @@ if st.session_state.active_page == "Trang chủ":
         if st.button("📊 Xem phân tích khảo sát", type="secondary", use_container_width=True):
             go_to("Phân tích khảo sát")
             st.rerun()
-    with cta3:
-        if st.button("↺ Khôi phục gốc", type="secondary", use_container_width=True):
-            st.session_state.survey_df = get_default_survey_data()
-            st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B (30 HS)"
-            st.rerun()
+  
 
     st.write("")
 
@@ -959,4 +955,4 @@ elif st.session_state.active_page == "Kiến thức & An toàn":
     st.text_area("Nội dung báo cáo tổng hợp", value=report_text, height=200)
 
 st.divider()
-st.caption("Sản phẩm học tập STEM – Tin học 9 | Nhóm B | Dữ liệu vì sức khỏe học đường")
+st.caption("Sản phẩm học tập STEM – Tin học 9 | Made by LongLe VC | Dữ liệu vì sức khỏe học đường")
