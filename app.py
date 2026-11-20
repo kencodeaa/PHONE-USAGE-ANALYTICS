@@ -1,17 +1,12 @@
 """Mini App Nhóm B: PHONE USAGE ANALYTICS – Màn hình thông minh, giấc ngủ an lành.
 
-Cấu trúc code:
-1. Import và cấu hình trang + CSS giao diện tối (kèm hiệu ứng hover nổi & phát sáng)
-2. Quản lý trạng thái dữ liệu (Session State)
-3. Hàm đọc file Excel/CSV
-4. Thanh tiêu đề (Header) & Nút Khôi phục gốc / Xuất Excel
-5. Các Tab chức năng:
-   - Tab 1: Dashboard Tổng Quan (5 thẻ KPI, 3 thẻ nhóm, 2 biểu đồ Plotly)
-   - Tab 2: Tự Kiểm Tra Thói Quen (Tính giờ ngủ cá nhân + Thêm vào bảng lớp)
-   - Tab 3: Bảng Dữ Liệu Khảo Sát (Upload Excel/CSV, lọc, thêm/xóa bản ghi)
-   - Tab 4: Tiêu Chí & Điều Kiện
-   - Tab 5: Khu Vực Công Thức Excel
-   - Tab 6: Báo Cáo & Kiến Thức An Toàn
+Bố cục hiện đại lấy cảm hứng từ giao diện Landing/Dashboard:
+- Thanh Top Navigation (Logo + Chuyển trang nhanh + Nút Khôi phục gốc / Xuất Excel)
+- Trang Chủ (Hero Banner + Tổng quan khảo sát + Truy cập nhanh)
+- Tự Kiểm Tra Thói Quen
+- Phân Tích Khảo Sát (Dashboard biểu đồ, 3 nhóm sử dụng, bảng dữ liệu & lọc)
+- Công Thức & Tiêu Chí (Quy ước Tin học 9 + Khu vực công thức Excel)
+- Báo Cáo & Kiến Thức An Toàn
 """
 import pandas as pd
 import plotly.graph_objects as go
@@ -37,7 +32,7 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    /* Ẩn hoàn toàn thanh header mặc định của Streamlit */
+    /* Ẩn thanh header mặc định của Streamlit */
     header[data-testid="stHeader"] {
         display: none;
     }
@@ -47,134 +42,255 @@ st.markdown(
         color: #F3F4F6;
     }
     .block-container {
-        padding-top: 1rem;
-        padding-bottom: 2rem;
-        max-width: 1400px;
+        padding-top: 1.1rem;
+        padding-bottom: 2.5rem;
+        max-width: 1360px;
     }
 
-    /* Header Banner */
-    .top-header {
+    /* LOGO & BRANDING */
+    .brand-wrap {
         display: flex;
         align-items: center;
-        gap: 14px;
-        margin-bottom: 0.5rem;
+        gap: 12px;
     }
-    .app-logo {
-        width: 44px;
-        height: 44px;
+    .brand-icon {
+        width: 42px;
+        height: 42px;
         background: linear-gradient(135deg, #3B82F6, #2563EB);
-        border-radius: 10px;
+        border-radius: 11px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 22px;
-        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
-        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+        font-size: 20px;
+        box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4);
+        transition: all 0.25s ease;
     }
-    .app-logo:hover {
-        transform: translateY(-2px) scale(1.04);
-        box-shadow: 0 6px 22px rgba(59, 130, 246, 0.65);
+    .brand-icon:hover {
+        transform: translateY(-2px) scale(1.05);
+        box-shadow: 0 6px 24px rgba(59, 130, 246, 0.7);
     }
-    .app-title {
-        font-size: 1.35rem;
+    .brand-name {
+        font-size: 1.15rem;
         font-weight: 800;
-        letter-spacing: 0.03em;
         color: #FFFFFF;
-        margin: 0;
-        line-height: 1.2;
+        letter-spacing: 0.04em;
+        line-height: 1.15;
     }
-    .app-subtitle {
-        font-size: 0.85rem;
+    .brand-sub {
+        font-size: 0.7rem;
+        font-weight: 600;
         color: #9CA3AF;
-        margin: 2px 0 0 0;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
     }
 
-    /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO NÚT BẤM */
+    /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO TẤT CẢ CÁC NÚT */
     div.stButton > button,
     div.stDownloadButton > button {
         transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
+        font-weight: 600 !important;
     }
-    div.stButton > button:hover {
+
+    /* Nút thường / Nút điều hướng */
+    div.stButton > button[kind="secondary"] {
+        background-color: #131A2A !important;
+        border: 1px solid #1F2937 !important;
+        color: #E5E7EB !important;
+    }
+    div.stButton > button[kind="secondary"]:hover {
         transform: translateY(-3px) !important;
-        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45), 0 0 12px rgba(59, 130, 246, 0.3) !important;
         border-color: #60A5FA !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4), 0 0 12px rgba(96, 165, 250, 0.28) !important;
+    }
+
+    /* Nút chính (Primary - Xanh dương) */
+    div.stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+        border: 1px solid #60A5FA !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35) !important;
+    }
+    div.stButton > button[kind="primary"]:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 8px 24px rgba(59, 130, 246, 0.65), 0 0 16px rgba(96, 165, 250, 0.45) !important;
+    }
+
+    /* Nút tải Excel (Đỏ nổi bật) */
+    div.stDownloadButton > button {
+        background: linear-gradient(135deg, #EF4444, #DC2626) !important;
+        border: 1px solid #F87171 !important;
+        color: #FFFFFF !important;
     }
     div.stDownloadButton > button:hover {
         transform: translateY(-3px) !important;
-        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.55), 0 0 14px rgba(248, 113, 113, 0.4) !important;
+        box-shadow: 0 8px 24px rgba(239, 68, 68, 0.6), 0 0 16px rgba(248, 113, 113, 0.45) !important;
         border-color: #FCA5A5 !important;
     }
+
     div.stButton > button:active,
     div.stDownloadButton > button:active {
         transform: translateY(0px) scale(0.98) !important;
     }
 
-    /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO THANH MENU TABS */
-    button[data-baseweb="tab"] {
-        transition: all 0.25s ease !important;
-        border-radius: 6px !important;
-        padding: 6px 12px !important;
+    /* HERO BANNER (PHONG CÁCH THẺ LỚN HIỆN ĐẠI) */
+    .hero-card {
+        background: radial-gradient(circle at 82% 45%, rgba(59, 130, 246, 0.16) 0%, rgba(19, 26, 42, 0.96) 55%, #111827 100%);
+        border: 1px solid #1F2937;
+        border-radius: 20px;
+        padding: 34px 38px;
+        margin: 14px 0 26px 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 28px;
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45);
+        transition: all 0.3s ease;
     }
-    button[data-baseweb="tab"]:hover {
-        transform: translateY(-2px) !important;
-        background-color: rgba(255, 255, 255, 0.06) !important;
-        text-shadow: 0 0 10px rgba(255, 255, 255, 0.6) !important;
-        color: #FFFFFF !important;
+    .hero-card:hover {
+        border-color: #2D3B55;
+        box-shadow: 0 18px 42px rgba(37, 99, 235, 0.14);
+    }
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(59, 130, 246, 0.12);
+        border: 1px solid rgba(96, 165, 250, 0.3);
+        color: #93C5FD;
+        padding: 5px 14px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+    .hero-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #60A5FA;
+        box-shadow: 0 0 8px #60A5FA;
+    }
+    .hero-heading {
+        font-size: 2.35rem;
+        font-weight: 900;
+        line-height: 1.12;
+        letter-spacing: -0.01em;
+        margin: 0 0 16px 0;
+        color: #FFFFFF;
+    }
+    .hero-heading span {
+        background: linear-gradient(90deg, #60A5FA, #818CF8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .hero-desc {
+        font-size: 0.96rem;
+        color: #CBD5E1;
+        line-height: 1.6;
+        max-width: 560px;
+        margin-bottom: 8px;
+    }
+    .hero-visual {
+        position: relative;
+        min-width: 310px;
+        height: 230px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .float-pill {
+        position: absolute;
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(8px);
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 8px 13px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        transition: all 0.25s ease;
+    }
+    .float-pill:hover {
+        transform: translateY(-3px);
+        border-color: #60A5FA;
+        box-shadow: 0 10px 24px rgba(59, 130, 246, 0.35);
     }
 
-    /* 5 Thẻ KPI + Hiệu ứng Hover */
+    /* TIÊU ĐỀ SECTION & PILL NGUỒN DỮ LIỆU */
+    .sec-title {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #FFFFFF;
+        margin: 8px 0 4px 0;
+    }
+    .sec-sub {
+        font-size: 0.86rem;
+        color: #9CA3AF;
+        margin-bottom: 10px;
+    }
+    .source-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: #131A2A;
+        border: 1px solid #1F2937;
+        border-radius: 999px;
+        padding: 4px 14px;
+        font-size: 0.78rem;
+        color: #9CA3AF;
+        margin-bottom: 16px;
+    }
+
+    /* THẺ KPI (4 THẺ TỔNG QUAN) + HOVER PHÁT SÁNG */
     .kpi-card {
         background-color: #131A2A;
         border: 1px solid #1F2937;
-        border-radius: 12px;
-        padding: 16px 18px;
+        border-radius: 14px;
+        padding: 18px 20px;
         height: 100%;
         transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
         cursor: default;
     }
     .kpi-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-5px);
         border-color: #3B82F6;
-        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3), 0 0 15px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 12px 26px -4px rgba(59, 130, 246, 0.35), 0 0 15px rgba(59, 130, 246, 0.22);
     }
     .kpi-top {
         display: flex;
         justify-content: space-between;
-        align-items: flex-start;
+        align-items: center;
+        margin-bottom: 12px;
     }
     .kpi-label {
-        font-size: 0.72rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+        font-size: 0.8rem;
+        font-weight: 600;
         color: #9CA3AF;
-        margin-bottom: 6px;
     }
     .kpi-value {
-        font-size: 1.75rem;
+        font-size: 1.95rem;
         font-weight: 800;
         color: #FFFFFF;
-        line-height: 1.15;
+        line-height: 1.1;
     }
     .kpi-sub {
         font-size: 0.78rem;
-        margin-top: 6px;
-        font-weight: 500;
+        margin-top: 8px;
+        color: #9CA3AF;
     }
     .kpi-icon {
         width: 34px;
         height: 34px;
-        border-radius: 8px;
+        border-radius: 9px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 16px;
     }
 
-    /* 3 Thẻ phân nhóm + Hiệu ứng Hover phát sáng theo từng màu */
+    /* 3 THẺ PHÂN NHÓM (NHÓM 1, NHÓM 2, NHÓM 3) + HOVER PHÁT SÁNG THEO MÀU */
     .group-card {
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 18px 20px;
         height: 100%;
         transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -187,7 +303,7 @@ st.markdown(
     .group-1:hover {
         transform: translateY(-5px);
         border-color: #60A5FA;
-        box-shadow: 0 12px 28px -4px rgba(59, 130, 246, 0.45), 0 0 18px rgba(96, 165, 250, 0.3);
+        box-shadow: 0 12px 28px -4px rgba(59, 130, 246, 0.48), 0 0 18px rgba(96, 165, 250, 0.32);
     }
     .group-2 {
         background: linear-gradient(145deg, #1E1B3A 0%, #111927 100%);
@@ -196,7 +312,7 @@ st.markdown(
     .group-2:hover {
         transform: translateY(-5px);
         border-color: #A5B4FC;
-        box-shadow: 0 12px 28px -4px rgba(99, 102, 241, 0.45), 0 0 18px rgba(165, 180, 252, 0.3);
+        box-shadow: 0 12px 28px -4px rgba(99, 102, 241, 0.48), 0 0 18px rgba(165, 180, 252, 0.32);
     }
     .group-3 {
         background: linear-gradient(145deg, #2D1520 0%, #111927 100%);
@@ -205,7 +321,7 @@ st.markdown(
     .group-3:hover {
         transform: translateY(-5px);
         border-color: #F87171;
-        box-shadow: 0 12px 28px -4px rgba(239, 68, 68, 0.45), 0 0 18px rgba(248, 113, 113, 0.3);
+        box-shadow: 0 12px 28px -4px rgba(239, 68, 68, 0.48), 0 0 18px rgba(248, 113, 113, 0.32);
     }
     .group-title {
         font-size: 0.78rem;
@@ -229,25 +345,61 @@ st.markdown(
         padding-top: 8px;
         border-top: 1px solid rgba(255,255,255,0.08);
     }
-    .chart-box {
+
+    /* THẺ TRUY CẬP NHANH (QUICK ACCESS CARDS) */
+    .quick-card {
         background-color: #131A2A;
         border: 1px solid #1F2937;
-        border-radius: 12px;
-        padding: 16px;
+        border-radius: 16px;
+        padding: 20px 22px;
+        margin-bottom: 10px;
+        min-height: 158px;
+        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .quick-card:hover {
+        transform: translateY(-5px);
+        border-color: #60A5FA;
+        box-shadow: 0 12px 28px rgba(59, 130, 246, 0.3), 0 0 14px rgba(96, 165, 250, 0.22);
+    }
+    .quick-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+    .quick-title {
+        font-size: 1.02rem;
+        font-weight: 700;
+        color: #FFFFFF;
+        margin-bottom: 6px;
+    }
+    .quick-desc {
+        font-size: 0.83rem;
+        color: #9CA3AF;
+        line-height: 1.5;
     }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-# [2] KHỞI TẠO DỮ LIỆU TRONG SESSION STATE
+# [2] KHỞI TẠO DỮ LIỆU & TRẠNG THÁI TRANG (NAVIGATION)
 if "survey_df" not in st.session_state:
     st.session_state.survey_df = get_default_survey_data()
 if "data_source_label" not in st.session_state:
-    st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B"
+    st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B (30 HS)"
+if "active_page" not in st.session_state:
+    st.session_state.active_page = "Trang chủ"
 
 
-# [3] HÀM ĐỌC FILE EXCEL / CSV
+def go_to(page_name: str):
+    st.session_state.active_page = page_name
+
+
 def read_uploaded_file(uploaded_file) -> pd.DataFrame:
     name = uploaded_file.name.lower()
     if name.endswith((".xlsx", ".xls")):
@@ -265,64 +417,134 @@ def read_uploaded_file(uploaded_file) -> pd.DataFrame:
 df = st.session_state.survey_df
 summary = summarize_dataframe(df)
 
-# [4] THANH TIÊU ĐỀ (HEADER) & NÚT THAO TÁC NHANH
-hdr_left, hdr_right1, hdr_right2 = st.columns([6.5, 1.6, 1.6])
-with hdr_left:
+# [3] THANH ĐIỀU HƯỚNG TRÊN CÙNG (TOP NAVBAR)
+nav_logo, nav_p1, nav_p2, nav_p3, nav_p4, nav_p5, nav_dl = st.columns([2.6, 1.15, 1.45, 1.55, 1.45, 1.35, 1.25])
+
+with nav_logo:
     st.markdown(
-        f"""
-        <div class="top-header">
-            <div class="app-logo">📱</div>
+        """
+        <div class="brand-wrap">
+            <div class="brand-icon">📱</div>
             <div>
-                <div class="app-title">PHONE USAGE ANALYTICS</div>
-                <div class="app-subtitle">Khảo sát Thời gian Sử dụng Điện thoại & Giấc ngủ – Lớp 9B ({summary['total']} Học sinh) • Màn hình thông minh – Giấc ngủ an lành</div>
+                <div class="brand-name">PHONE USAGE</div>
+                <div class="brand-sub">SCREEN &amp; SLEEP ANALYTICS</div>
             </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
-with hdr_right1:
-    if st.button("↺ Khôi phục gốc", use_container_width=True):
-        st.session_state.survey_df = get_default_survey_data()
-        st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B"
-        st.rerun()
-with hdr_right2:
+
+pages = [
+    ("Trang chủ", "🏠 Trang chủ", nav_p1),
+    ("Tự kiểm tra", "🧭 Tự kiểm tra", nav_p2),
+    ("Phân tích khảo sát", "📊 Phân tích khảo sát", nav_p3),
+    ("Công thức & Tiêu chí", "🖩 Công thức Excel", nav_p4),
+    ("Kiến thức & An toàn", "📘 Kiến thức & An toàn", nav_p5),
+]
+
+for page_key, page_label, col in pages:
+    with col:
+        btn_type = "primary" if st.session_state.active_page == page_key else "secondary"
+        if st.button(page_label, key=f"nav_{page_key}", use_container_width=True, type=btn_type):
+            go_to(page_key)
+            st.rerun()
+
+with nav_dl:
     st.download_button(
         "📥 Xuất Excel",
         data=export_excel_workbook(df),
         file_name="Phone_Usage_Analytics_Lop_9B.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         use_container_width=True,
-        type="primary",
     )
 
-# [5] THANH ĐIỀU HƯỚNG CÁC TAB
-tab_dash, tab_self, tab_data, tab_criteria, tab_excel, tab_report = st.tabs([
-    "📊 Dashboard Tổng Quan",
-    "🧭 Tự Kiểm Tra Thói Quen",
-    "⊞ Bảng Dữ Liệu Khảo Sát",
-    "⚖️ Tiêu Chí & Điều Kiện",
-    "🖩 Khu Vực Công Thức Excel",
-    "📘 Báo Cáo & Kiến Thức",
-])
+st.write("")
 
 # ==============================================================================
-# TAB 1: DASHBOARD TỔNG QUAN
+# TRANG 1: TRANG CHỦ (BỐ CỤC TƯƠNG TỰ MẪU THAM KHẢO, GIỮ NGUYÊN BẢNG MÀU)
 # ==============================================================================
-with tab_dash:
-    # Hàng 1: 5 thẻ KPI
-    k1, k2, k3, k4, k5 = st.columns(5)
+if st.session_state.active_page == "Trang chủ":
+    # 1. HERO BANNER 2 CỘT
+    st.markdown(
+        """
+        <div class="hero-card">
+            <div style="flex: 1.2;">
+                <div class="hero-badge">
+                    <span class="hero-dot"></span>
+                    <span>Sản phẩm STEM Tin học 9 • Nhóm B (Lớp 9B)</span>
+                </div>
+                <h1 class="hero-heading">SMART SCREEN.<br><span>RESTFUL SLEEP.</span></h1>
+                <p class="hero-desc">
+                    <b>PHONE USAGE ANALYTICS</b> giúp học sinh phân tích dữ liệu khảo sát ẩn danh về thời gian sử dụng
+                    điện thoại và giấc ngủ. Giảm màn hình trước ngủ – nâng cao chất lượng nghỉ ngơi mỗi ngày.
+                </p>
+            </div>
+            <div class="hero-visual">
+                <svg width="230" height="230" viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="110" cy="110" r="92" stroke="#1E293B" stroke-width="10"/>
+                    <circle cx="110" cy="110" r="72" stroke="#1E293B" stroke-width="10"/>
+                    <path d="M110 18 A92 92 0 1 1 26 148" stroke="#3B82F6" stroke-width="10" stroke-linecap="round"/>
+                    <path d="M110 38 A72 72 0 1 1 56 156" stroke="#818CF8" stroke-width="10" stroke-linecap="round"/>
+                    <circle cx="110" cy="110" r="46" fill="#0F172A" stroke="#334155" stroke-width="2"/>
+                    <rect x="96" y="84" width="28" height="48" rx="6" fill="#1E293B" stroke="#60A5FA" stroke-width="2.5"/>
+                    <circle cx="110" cy="124" r="2" fill="#60A5FA"/>
+                    <path d="M128 84C133 84 137 88 137 93C132 93 128 89 128 84Z" fill="#FBBF24"/>
+                    <text x="129" y="79" fill="#FBBF24" font-size="11" font-weight="bold">zZ</text>
+                </svg>
+                <div class="float-pill" style="top: 12px; right: -8px;">
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #60A5FA;">Khuyến nghị ngủ ≥ 8h</div>
+                    <div style="font-size: 0.68rem; color: #9CA3AF;">mốc tham khảo tuổi 13–18</div>
+                </div>
+                <div class="float-pill" style="bottom: 16px; left: -12px;">
+                    <div style="font-size: 0.78rem; font-weight: 700; color: #F87171;">Dùng ĐT &gt; 4 giờ/ngày</div>
+                    <div style="font-size: 0.68rem; color: #9CA3AF;">ngưỡng cảnh báo thói quen</div>
+                </div>
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Hai nút hành động chính ngay dưới Hero Banner
+    cta1, cta2, cta3, _ = st.columns([1.8, 1.8, 1.5, 4.9])
+    with cta1:
+        if st.button("🧭 Bắt đầu tự kiểm tra", type="primary", use_container_width=True):
+            go_to("Tự kiểm tra")
+            st.rerun()
+    with cta2:
+        if st.button("📊 Xem phân tích khảo sát", type="secondary", use_container_width=True):
+            go_to("Phân tích khảo sát")
+            st.rerun()
+    with cta3:
+        if st.button("↺ Khôi phục gốc", type="secondary", use_container_width=True):
+            st.session_state.survey_df = get_default_survey_data()
+            st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B (30 HS)"
+            st.rerun()
+
+    st.write("")
+
+    # 2. TỔNG QUAN KHẢO SÁT (4 THẺ KPI NỔI BẬT)
+    st.markdown('<div class="sec-title">Tổng quan khảo sát</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sec-sub">Các chỉ số được tính trực tiếp từ dữ liệu khảo sát đang nạp trong ứng dụng.</div>',
+        unsafe_allow_html=True,
+    )
+    st.markdown(
+        f'<div class="source-pill"><span class="hero-dot"></span><span>Nguồn: {st.session_state.data_source_label}</span></div>',
+        unsafe_allow_html=True,
+    )
+
+    k1, k2, k3, k4 = st.columns(4)
     with k1:
         st.markdown(
             f"""
             <div class="kpi-card">
                 <div class="kpi-top">
-                    <div>
-                        <div class="kpi-label">TỔNG HỌC SINH</div>
-                        <div class="kpi-value">{summary['total']}</div>
-                    </div>
-                    <div class="kpi-icon" style="background:rgba(148,163,184,0.15); color:#E2E8F0;">👥</div>
+                    <span class="kpi-label">Số học sinh trong dữ liệu</span>
+                    <div class="kpi-icon" style="background:rgba(59,130,246,0.15); color:#60A5FA;">👥</div>
                 </div>
-                <div class="kpi-sub" style="color:#9CA3AF;">👥 Lớp 9B khảo sát</div>
+                <div class="kpi-value">{summary['total']}</div>
+                <div class="kpi-sub">Lớp 9B khảo sát • Dùng ĐT TB: <b style="color:#E5E7EB;">{summary['avg_screen']}h</b></div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -332,13 +554,11 @@ with tab_dash:
             f"""
             <div class="kpi-card">
                 <div class="kpi-top">
-                    <div>
-                        <div class="kpi-label">THỜI GIAN DÙNG ĐT TB</div>
-                        <div class="kpi-value">{summary['avg_screen']} h</div>
-                    </div>
-                    <div class="kpi-icon" style="background:rgba(56,189,248,0.15); color:#38BDF8;">🕒</div>
+                    <span class="kpi-label">Dùng điện thoại &lt; 2 giờ/ngày</span>
+                    <div class="kpi-icon" style="background:rgba(56,189,248,0.15); color:#38BDF8;">🛡️</div>
                 </div>
-                <div class="kpi-sub" style="color:#9CA3AF;">Giờ / ngày / học sinh</div>
+                <div class="kpi-value" style="color:#60A5FA;">{summary['g1_count']} HS</div>
+                <div class="kpi-sub">Nhóm 1 an toàn • Tổng {summary['g1_sum']}h sử dụng</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -348,13 +568,11 @@ with tab_dash:
             f"""
             <div class="kpi-card">
                 <div class="kpi-top">
-                    <div>
-                        <div class="kpi-label">THỜI LƯỢNG NGỦ TB</div>
-                        <div class="kpi-value">{summary['avg_sleep']} h</div>
-                    </div>
-                    <div class="kpi-icon" style="background:rgba(129,140,248,0.15); color:#818CF8;">🛏️</div>
+                    <span class="kpi-label">Dùng màn hình trước khi ngủ</span>
+                    <div class="kpi-icon" style="background:rgba(251,191,36,0.15); color:#FBBF24;">🌙</div>
                 </div>
-                <div class="kpi-sub" style="color:#FBBF24;">Khuyến nghị: ≥ 8h</div>
+                <div class="kpi-value" style="color:#FBBF24;">{summary['before_bed_yes']} HS</div>
+                <div class="kpi-sub">{summary['before_pct']}% tổng số học sinh • Ngủ TB: {summary['avg_sleep']}h</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -364,29 +582,11 @@ with tab_dash:
             f"""
             <div class="kpi-card">
                 <div class="kpi-top">
-                    <div>
-                        <div class="kpi-label">MÀN HÌNH TRƯỚC NGỦ</div>
-                        <div class="kpi-value" style="color:#FBBF24;">{summary['before_bed_yes']} HS</div>
-                    </div>
-                    <div class="kpi-icon" style="background:rgba(251,191,36,0.15); color:#FBBF24;">🌙</div>
-                </div>
-                <div class="kpi-sub" style="color:#9CA3AF;">{summary['before_pct']}% tổng số học sinh</div>
-            </div>
-            """,
-            unsafe_allow_html=True,
-        )
-    with k5:
-        st.markdown(
-            f"""
-            <div class="kpi-card">
-                <div class="kpi-top">
-                    <div>
-                        <div class="kpi-label">CẦN LƯU Ý CẢNH BÁO</div>
-                        <div class="kpi-value" style="color:#F87171;">{summary['warning_count']} HS</div>
-                    </div>
+                    <span class="kpi-label">Cần lưu ý cảnh báo</span>
                     <div class="kpi-icon" style="background:rgba(248,113,113,0.15); color:#F87171;">⚠️</div>
                 </div>
-                <div class="kpi-sub" style="color:#F87171;">Cần can thiệp/nhắc nhở</div>
+                <div class="kpi-value" style="color:#F87171;">{summary['warning_count']} HS</div>
+                <div class="kpi-sub" style="color:#FCA5A5;">Nhóm &gt;4h: {summary['g3_count']} HS • Ngủ &lt;8h: {summary['sleep_under']} HS</div>
             </div>
             """,
             unsafe_allow_html=True,
@@ -394,7 +594,137 @@ with tab_dash:
 
     st.write("")
 
-    # Hàng 2: 3 thẻ phân nhóm sử dụng điện thoại
+    # 3. TRUY CẬP NHANH (3 THẺ CHỨC NĂNG)
+    st.markdown('<div class="sec-title">Truy cập nhanh</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-sub">Chọn một mục để bắt đầu khám phá dữ liệu.</div>', unsafe_allow_html=True)
+
+    q1, q2, q3 = st.columns(3)
+    with q1:
+        st.markdown(
+            """
+            <div class="quick-card">
+                <div class="quick-icon" style="background:rgba(59,130,246,0.16); color:#60A5FA;">🧭</div>
+                <div class="quick-title">Tự kiểm tra thói quen</div>
+                <div class="quick-desc">Nhập thời gian dùng màn hình và giờ đi ngủ/thức dậy để nhận thông điệp gợi ý phù hợp.</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Mở Tự kiểm tra →", key="q_btn_1", use_container_width=True):
+            go_to("Tự kiểm tra")
+            st.rerun()
+
+    with q2:
+        st.markdown(
+            """
+            <div class="quick-card">
+                <div class="quick-icon" style="background:rgba(129,140,248,0.16); color:#818CF8;">📊</div>
+                <div class="quick-title">Phân tích khảo sát</div>
+                <div class="quick-desc">Nạp tệp Excel/CSV, xem 3 nhóm phân loại, biểu đồ trực quan và xuất báo cáo tổng hợp.</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Mở Phân tích khảo sát →", key="q_btn_2", use_container_width=True):
+            go_to("Phân tích khảo sát")
+            st.rerun()
+
+    with q3:
+        st.markdown(
+            """
+            <div class="quick-card">
+                <div class="quick-icon" style="background:rgba(251,191,36,0.16); color:#FBBF24;">📘</div>
+                <div class="quick-title">Kiến thức &amp; an toàn</div>
+                <div class="quick-desc">Mốc tham khảo giấc ngủ, quy ước của dự án và các nguyên tắc bảo vệ thông tin học đường.</div>
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+        if st.button("Mở Kiến thức & An toàn →", key="q_btn_3", use_container_width=True):
+            go_to("Kiến thức & An toàn")
+            st.rerun()
+
+
+# ==============================================================================
+# TRANG 2: TỰ KIỂM TRA THÓI QUEN
+# ==============================================================================
+elif st.session_state.active_page == "Tự kiểm tra":
+    st.markdown('<div class="sec-title">🧭 Tự xem lại một số thói quen cá nhân</div>', unsafe_allow_html=True)
+    st.markdown(
+        '<div class="sec-sub">Nhập thông tin để xem cách ứng dụng phân tích. Không cần nhập họ tên hay thông tin định danh.</div>',
+        unsafe_allow_html=True,
+    )
+
+    c1, c2 = st.columns(2)
+    with c1:
+        screen_hours = st.number_input(
+            "Thời gian sử dụng màn hình (giờ/ngày)",
+            min_value=0.0,
+            max_value=24.0,
+            value=3.0,
+            step=0.5,
+        )
+        before_sleep = st.radio(
+            "Có sử dụng màn hình trong 1 giờ trước khi ngủ?",
+            ["Không", "Có"],
+            horizontal=True,
+        )
+    with c2:
+        bedtime = st.time_input("Giờ đi ngủ", value=pd.Timestamp("2026-01-01 22:00").time())
+        wake_time = st.time_input("Giờ thức dậy", value=pd.Timestamp("2026-01-02 06:30").time())
+
+    sleep_hours = calculate_sleep_hours(bedtime, wake_time)
+    if sleep_hours is None:
+        st.warning("Không tính được thời lượng ngủ. Hãy kiểm tra lại giờ đi ngủ và giờ thức dậy.")
+    else:
+        m1, m2, m3 = st.columns(3)
+        m1.metric("Thời lượng ngủ tính được", f"{sleep_hours:.1f} giờ")
+        m2.metric(
+            "Nhóm thời lượng ngủ",
+            "Dưới 8 giờ" if sleep_hours < 8 else ("8–10 giờ" if sleep_hours <= 10 else "Trên 10 giờ"),
+        )
+        m3.metric(
+            "Phân nhóm dùng điện thoại",
+            "Nhóm 1 (< 2h)" if screen_hours < 2 else ("Nhóm 2 (2h – 4h)" if screen_hours <= 4 else "Nhóm 3 (> 4h)"),
+        )
+
+        msg = create_message(screen_hours, before_sleep, sleep_hours)
+        if msg.startswith("Cần"):
+            st.warning(f"⚠️ {msg}")
+        else:
+            st.success(f"✅ {msg}")
+
+        if st.button("➕ Thêm kết quả ẩn danh này vào dữ liệu khảo sát lớp 9B", type="primary"):
+            next_num = len(st.session_state.survey_df) + 1
+            new_row = pd.DataFrame([{
+                "Mã HS": f"HS{next_num:02d}",
+                "Thời gian sử dụng màn hình (giờ/ngày)": float(screen_hours),
+                "Có sử dụng màn hình trong 1 giờ trước khi ngủ? (Có/Không)": before_sleep,
+                "Giờ đi ngủ": bedtime.strftime("%H:%M"),
+                "Giờ thức dậy": wake_time.strftime("%H:%M"),
+                "Thời lượng ngủ (giờ)": sleep_hours,
+                "Tự đánh giá ngủ đủ? (Có/Không)": "Có" if sleep_hours >= 8 else "Không",
+            }])
+            st.session_state.survey_df = prepare_dataframe(
+                pd.concat([st.session_state.survey_df, new_row], ignore_index=True)
+            )
+            st.success(f"Đã thêm mã HS{next_num:02d} vào bảng khảo sát!")
+            st.rerun()
+
+    st.caption("Ngưỡng >4 giờ/ngày là quy ước học tập của dự án; mốc 8–10 giờ là khuyến nghị tham khảo phổ biến cho thanh thiếu niên 13–18 tuổi.")
+
+
+# ==============================================================================
+# TRANG 3: PHÂN TÍCH KHẢO SÁT (3 NHÓM, BIỂU ĐỒ & BẢNG DỮ LIỆU)
+# ==============================================================================
+elif st.session_state.active_page == "Phân tích khảo sát":
+    st.markdown('<div class="sec-title">📊 Phân tích chi tiết khảo sát lớp 9B</div>', unsafe_allow_html=True)
+    st.markdown(
+        f'<div class="source-pill"><span class="hero-dot"></span><span>Nguồn hiện tại: {st.session_state.data_source_label}</span></div>',
+        unsafe_allow_html=True,
+    )
+
+    # Hàng 1: 3 thẻ phân nhóm sử dụng điện thoại (Nổi & phát sáng theo màu)
     g1, g2, g3 = st.columns(3)
     with g1:
         st.markdown(
@@ -444,7 +774,7 @@ with tab_dash:
 
     st.write("")
 
-    # Hàng 3: 2 Biểu đồ Plotly (Cột & Donut)
+    # Hàng 2: 2 Biểu đồ Plotly
     c_left, c_right = st.columns(2)
     with c_left:
         st.markdown("##### 📊 Phân Phối Học Sinh Theo Nhóm Sử Dụng Điện Thoại")
@@ -464,7 +794,7 @@ with tab_dash:
             plot_bgcolor="#131A2A",
             font=dict(color="#E5E7EB"),
             margin=dict(l=20, r=20, t=25, b=20),
-            height=330,
+            height=320,
             yaxis=dict(gridcolor="#1F2937", title="Số học sinh", dtick=1),
             xaxis=dict(gridcolor="#1F2937"),
         )
@@ -489,86 +819,16 @@ with tab_dash:
             plot_bgcolor="#131A2A",
             font=dict(color="#E5E7EB"),
             margin=dict(l=20, r=20, t=25, b=20),
-            height=330,
+            height=320,
             showlegend=True,
             legend=dict(orientation="h", yanchor="bottom", y=-0.12, xanchor="center", x=0.5),
         )
         st.plotly_chart(fig_donut, use_container_width=True)
 
+    st.divider()
 
-# ==============================================================================
-# TAB 2: TỰ KIỂM TRA THÓI QUEN
-# ==============================================================================
-with tab_self:
-    st.subheader("🧭 Tự xem lại một số thói quen cá nhân")
-    st.write("Nhập thông tin để xem cách ứng dụng phân tích. Không cần nhập họ tên hay thông tin định danh.")
-
-    c1, c2 = st.columns(2)
-    with c1:
-        screen_hours = st.number_input(
-            "Thời gian sử dụng màn hình (giờ/ngày)",
-            min_value=0.0,
-            max_value=24.0,
-            value=3.0,
-            step=0.5,
-        )
-        before_sleep = st.radio(
-            "Có sử dụng màn hình trong 1 giờ trước khi ngủ?",
-            ["Không", "Có"],
-            horizontal=True,
-        )
-    with c2:
-        bedtime = st.time_input("Giờ đi ngủ", value=pd.Timestamp("2026-01-01 22:00").time())
-        wake_time = st.time_input("Giờ thức dậy", value=pd.Timestamp("2026-01-02 06:30").time())
-
-    sleep_hours = calculate_sleep_hours(bedtime, wake_time)
-    if sleep_hours is None:
-        st.warning("Không tính được thời lượng ngủ. Hãy kiểm tra lại giờ đi ngủ và giờ thức dậy.")
-    else:
-        m1, m2, m3 = st.columns(3)
-        m1.metric("Thời lượng ngủ tính được", f"{sleep_hours:.1f} giờ")
-        m2.metric(
-            "Nhóm thời lượng ngủ",
-            "Dưới 8 giờ" if sleep_hours < 8 else ("8–10 giờ" if sleep_hours <= 10 else "Trên 10 giờ"),
-        )
-        m3.metric(
-            "Phân nhóm dùng điện thoại",
-            "Nhóm 1 (< 2h)" if screen_hours < 2 else ("Nhóm 2 (2h – 4h)" if screen_hours <= 4 else "Nhóm 3 (> 4h)"),
-        )
-
-        msg = create_message(screen_hours, before_sleep, sleep_hours)
-        if msg.startswith("Cần"):
-            st.warning(f"⚠️ {msg}")
-        else:
-            st.success(f"✅ {msg}")
-
-        if st.button("➕ Thêm kết quả ẩn danh này vào dữ liệu khảo sát lớp 9B"):
-            next_num = len(st.session_state.survey_df) + 1
-            new_row = pd.DataFrame([{
-                "Mã HS": f"HS{next_num:02d}",
-                "Thời gian sử dụng màn hình (giờ/ngày)": float(screen_hours),
-                "Có sử dụng màn hình trong 1 giờ trước khi ngủ? (Có/Không)": before_sleep,
-                "Giờ đi ngủ": bedtime.strftime("%H:%M"),
-                "Giờ thức dậy": wake_time.strftime("%H:%M"),
-                "Thời lượng ngủ (giờ)": sleep_hours,
-                "Tự đánh giá ngủ đủ? (Có/Không)": "Có" if sleep_hours >= 8 else "Không",
-            }])
-            st.session_state.survey_df = prepare_dataframe(
-                pd.concat([st.session_state.survey_df, new_row], ignore_index=True)
-            )
-            st.success(f"Đã thêm mã HS{next_num:02d} vào bảng khảo sát! Chuyển sang Dashboard để xem cập nhật.")
-            st.rerun()
-
-    st.caption("Ngưỡng >4 giờ/ngày là quy ước học tập của dự án; mốc 8–10 giờ là khuyến nghị tham khảo phổ biến cho thanh thiếu niên 13–18 tuổi.")
-
-
-# ==============================================================================
-# TAB 3: BẢNG DỮ LIỆU KHẢO SÁT
-# ==============================================================================
-with tab_data:
-    st.subheader("⊞ Bảng dữ liệu khảo sát lớp 9B")
-    st.caption(f"Nguồn dữ liệu hiện tại: **{st.session_state.data_source_label}**")
-
+    # Hàng 3: Tải file & Bảng dữ liệu khảo sát
+    st.markdown("#### ⊞ Quản lý & Tra cứu Dữ liệu Khảo sát")
     up_col1, up_col2 = st.columns([2, 1])
     with up_col1:
         uploaded = st.file_uploader(
@@ -594,7 +854,7 @@ with tab_data:
                 st.error(f"Không thể xử lý file: {exc}")
 
     with up_col2:
-        st.markdown("**Tải biểu mẫu CSV chuẩn**")
+        st.markdown("**Biểu mẫu & Khôi phục**")
         sample_csv = df[REQUIRED_COLUMNS].to_csv(index=False).encode("utf-8-sig")
         st.download_button(
             "⬇️ Tải file CSV mẫu (30 HS)",
@@ -603,6 +863,10 @@ with tab_data:
             mime="text/csv",
             use_container_width=True,
         )
+        if st.button("↺ Khôi phục 30 HS mặc định", key="reset_in_data", use_container_width=True):
+            st.session_state.survey_df = get_default_survey_data()
+            st.session_state.data_source_label = "Dữ liệu mô phỏng mặc định – Lớp 9B (30 HS)"
+            st.rerun()
 
     f1, f2 = st.columns([2, 1])
     with f1:
@@ -625,10 +889,10 @@ with tab_data:
 
 
 # ==============================================================================
-# TAB 4: TIÊU CHÍ & ĐIỀU KIỆN
+# TRANG 4: CÔNG THỨC EXCEL & TIÊU CHÍ
 # ==============================================================================
-with tab_criteria:
-    st.subheader("⚖️ Quy ước phân nhóm & tiêu chí đánh giá STEM Tin học 9")
+elif st.session_state.active_page == "Công thức & Tiêu chí":
+    st.markdown('<div class="sec-title">⚖️ Quy ước đánh giá & Khu vực công thức Excel (Tin học 9)</div>', unsafe_allow_html=True)
     c_a, c_b = st.columns(2)
     with c_a:
         st.info(
@@ -645,26 +909,7 @@ with tab_criteria:
             "- **Dùng màn hình 1 giờ trước ngủ = Có:** Gắn nhãn cần nhắc nhở điều chỉnh thói quen."
         )
 
-    st.markdown("#### Bảng tổng hợp các chỉ tiêu theo quy ước")
-    stat_table = pd.DataFrame([
-        ["Tổng số học sinh khảo sát", summary["total"], "Đếm số mã HS hợp lệ"],
-        ["Nhóm 1 (< 2 giờ/ngày)", f"{summary['g1_count']} HS ({summary['g1_sum']}h)", "Mức độ an toàn"],
-        ["Nhóm 2 (2 – 4 giờ/ngày)", f"{summary['g2_count']} HS ({summary['g2_sum']}h)", "Mức độ trung bình"],
-        ["Nhóm 3 (> 4 giờ/ngày)", f"{summary['g3_count']} HS ({summary['g3_sum']}h)", "Tương đương COUNTIF / SUMIF > 4"],
-        ["Số HS ngủ dưới 8 giờ", f"{summary['sleep_under']} HS ({summary['sum_sleep_under']}h)", "Tương đương COUNTIF / SUMIF < 8"],
-        ["Số HS dùng màn hình trong 1h trước ngủ", f"{summary['before_bed_yes']} HS ({summary['before_pct']}%)", "Tương đương COUNTIF = 'Có'"],
-        ["Số HS cần lưu ý cảnh báo chung", f"{summary['warning_count']} HS", "Thỏa mãn ít nhất 1 trong 3 điều kiện rủi ro"],
-    ], columns=["Chỉ tiêu", "Kết quả hiện tại", "Ghi chú quy ước"])
-    st.dataframe(stat_table, use_container_width=True, hide_index=True)
-
-
-# ==============================================================================
-# TAB 5: KHU VỰC CÔNG THỨC EXCEL
-# ==============================================================================
-with tab_excel:
-    st.subheader("🖩 Khu vực công thức Excel (Đối chiếu chương trình Tin học 9)")
-    st.write("Các phép tính trong Python của ứng dụng này mô phỏng trực tiếp các hàm bảng tính dưới đây (giả sử dữ liệu từ dòng 4 đến dòng 33):")
-
+    st.markdown("#### Đối chiếu công thức bảng tính Excel (dữ liệu dòng 4 đến dòng 33)")
     formulas = [
         ("1. Tính thời lượng ngủ qua nửa đêm (cột F)", '=ROUND(MOD(E4 - D4, 1) * 24, 1)', "Hàm MOD xử lý trường hợp đi ngủ trước 24:00 (VD 22:30) và thức dậy sau 00:00 (VD 06:30)."),
         ("2. Phân loại 3 nhóm sử dụng điện thoại", '=IF(B4<2, "Nhóm 1 (< 2h)", IF(B4<=4, "Nhóm 2 (2h - 4h)", "Nhóm 3 (> 4h)"))', "Hàm IF lồng nhau phân loại mức độ sử dụng màn hình theo ngày."),
@@ -681,10 +926,10 @@ with tab_excel:
 
 
 # ==============================================================================
-# TAB 6: BÁO CÁO & KIẾN THỨC AN TOÀN
+# TRANG 5: KIẾN THỨC & AN TOÀN
 # ==============================================================================
-with tab_report:
-    st.subheader("📘 Kiến thức nền, Đạo đức dữ liệu & Báo cáo lớp 9B")
+elif st.session_state.active_page == "Kiến thức & An toàn":
+    st.markdown('<div class="sec-title">📘 Kiến thức nền, Đạo đức dữ liệu & Báo cáo lớp 9B</div>', unsafe_allow_html=True)
     st.markdown(
         "**Một số điểm cần nhớ**\n"
         "- Thanh thiếu niên 13–18 tuổi thường được khuyến nghị ngủ khoảng 8–10 giờ mỗi ngày.\n"
