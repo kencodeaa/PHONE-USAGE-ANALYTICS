@@ -665,26 +665,8 @@ elif st.session_state.active_page == "Tự kiểm tra":
         else:
             st.success(f"✅ {msg}")
 
-        if st.button("➕ Thêm kết quả ẩn danh này vào dữ liệu khảo sát lớp 9B", type="primary"):
-            next_num = len(st.session_state.survey_df) + 1
-            new_row = pd.DataFrame([{
-                "Mã HS": f"HS{next_num:02d}",
-                "Thời gian sử dụng màn hình (giờ/ngày)": float(screen_hours),
-                "Có sử dụng màn hình trong 1 giờ trước khi ngủ? (Có/Không)": before_sleep,
-                "Giờ đi ngủ": bedtime.strftime("%H:%M"),
-                "Giờ thức dậy": wake_time.strftime("%H:%M"),
-                "Thời lượng ngủ (giờ)": sleep_hours,
-                "Tự đánh giá ngủ đủ? (Có/Không)": "Có" if sleep_hours >= 8 else "Không",
-            }])
-            st.session_state.survey_df = prepare_dataframe(
-                pd.concat([st.session_state.survey_df, new_row], ignore_index=True)
-            )
-            st.success(f"Đã thêm mã HS{next_num:02d} vào bảng khảo sát!")
-            st.rerun()
-
     st.caption("Ngưỡng >4 giờ/ngày là quy ước học tập của dự án; mốc 8–10 giờ là khuyến nghị tham khảo phổ biến cho thanh thiếu niên 13–18 tuổi.")
-
-
+    
 # ==============================================================================
 # TRANG 3: PHÂN TÍCH KHẢO SÁT (3 NHÓM, BIỂU ĐỒ & BẢNG DỮ LIỆU)
 # ==============================================================================
