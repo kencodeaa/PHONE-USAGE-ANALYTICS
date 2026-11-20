@@ -1,7 +1,7 @@
 """Mini App Nhóm B: PHONE USAGE ANALYTICS – Màn hình thông minh, giấc ngủ an lành.
 
 Cấu trúc code:
-1. Import và cấu hình trang + CSS giao diện tối
+1. Import và cấu hình trang + CSS giao diện tối (kèm hiệu ứng hover nổi & phát sáng)
 2. Quản lý trạng thái dữ liệu (Session State)
 3. Hàm đọc file Excel/CSV
 4. Thanh tiêu đề (Header) & Nút Khôi phục gốc / Xuất Excel
@@ -37,15 +37,21 @@ st.set_page_config(
 st.markdown(
     """
     <style>
+    /* Ẩn hoàn toàn thanh header mặc định của Streamlit */
+    header[data-testid="stHeader"] {
+        display: none;
+    }
+
     .stApp {
         background-color: #0B0F19;
         color: #F3F4F6;
     }
     .block-container {
-        padding-top: 1.5rem;
+        padding-top: 1rem;
         padding-bottom: 2rem;
         max-width: 1400px;
     }
+
     /* Header Banner */
     .top-header {
         display: flex;
@@ -63,6 +69,11 @@ st.markdown(
         justify-content: center;
         font-size: 22px;
         box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+    .app-logo:hover {
+        transform: translateY(-2px) scale(1.04);
+        box-shadow: 0 6px 22px rgba(59, 130, 246, 0.65);
     }
     .app-title {
         font-size: 1.35rem;
@@ -77,13 +88,55 @@ st.markdown(
         color: #9CA3AF;
         margin: 2px 0 0 0;
     }
-    /* 5 Thẻ KPI */
+
+    /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO NÚT BẤM */
+    div.stButton > button,
+    div.stDownloadButton > button {
+        transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+        border-radius: 8px !important;
+    }
+    div.stButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.45), 0 0 12px rgba(59, 130, 246, 0.3) !important;
+        border-color: #60A5FA !important;
+    }
+    div.stDownloadButton > button:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.55), 0 0 14px rgba(248, 113, 113, 0.4) !important;
+        border-color: #FCA5A5 !important;
+    }
+    div.stButton > button:active,
+    div.stDownloadButton > button:active {
+        transform: translateY(0px) scale(0.98) !important;
+    }
+
+    /* HIỆU ỨNG NỔI & PHÁT SÁNG CHO THANH MENU TABS */
+    button[data-baseweb="tab"] {
+        transition: all 0.25s ease !important;
+        border-radius: 6px !important;
+        padding: 6px 12px !important;
+    }
+    button[data-baseweb="tab"]:hover {
+        transform: translateY(-2px) !important;
+        background-color: rgba(255, 255, 255, 0.06) !important;
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.6) !important;
+        color: #FFFFFF !important;
+    }
+
+    /* 5 Thẻ KPI + Hiệu ứng Hover */
     .kpi-card {
         background-color: #131A2A;
         border: 1px solid #1F2937;
         border-radius: 12px;
         padding: 16px 18px;
         height: 100%;
+        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: default;
+    }
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        border-color: #3B82F6;
+        box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3), 0 0 15px rgba(59, 130, 246, 0.2);
     }
     .kpi-top {
         display: flex;
@@ -118,23 +171,41 @@ st.markdown(
         justify-content: center;
         font-size: 16px;
     }
-    /* 3 Thẻ phân nhóm */
+
+    /* 3 Thẻ phân nhóm + Hiệu ứng Hover phát sáng theo từng màu */
     .group-card {
         border-radius: 12px;
         padding: 18px 20px;
         height: 100%;
+        transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
+        cursor: default;
     }
     .group-1 {
         background: linear-gradient(145deg, #10253E 0%, #111927 100%);
         border: 1px solid #1D4ED8;
     }
+    .group-1:hover {
+        transform: translateY(-5px);
+        border-color: #60A5FA;
+        box-shadow: 0 12px 28px -4px rgba(59, 130, 246, 0.45), 0 0 18px rgba(96, 165, 250, 0.3);
+    }
     .group-2 {
         background: linear-gradient(145deg, #1E1B3A 0%, #111927 100%);
         border: 1px solid #4F46E5;
     }
+    .group-2:hover {
+        transform: translateY(-5px);
+        border-color: #A5B4FC;
+        box-shadow: 0 12px 28px -4px rgba(99, 102, 241, 0.45), 0 0 18px rgba(165, 180, 252, 0.3);
+    }
     .group-3 {
         background: linear-gradient(145deg, #2D1520 0%, #111927 100%);
         border: 1px solid #DC2626;
+    }
+    .group-3:hover {
+        transform: translateY(-5px);
+        border-color: #F87171;
+        box-shadow: 0 12px 28px -4px rgba(239, 68, 68, 0.45), 0 0 18px rgba(248, 113, 113, 0.3);
     }
     .group-title {
         font-size: 0.78rem;
@@ -168,18 +239,6 @@ st.markdown(
     """,
     unsafe_allow_html=True,
 )
-st.markdown("""
-    <style>
-        /* Ẩn hoàn toàn thanh header mặc định của Streamlit */
-        header[data-testid="stHeader"] {
-            display: none;
-        }
-        /* Thu gọn khoảng trống thừa ở trên cùng */
-        .block-container {
-            padding-top: 1rem;
-        }
-    </style>
-""", unsafe_allow_html=True)
 
 # [2] KHỞI TẠO DỮ LIỆU TRONG SESSION STATE
 if "survey_df" not in st.session_state:
