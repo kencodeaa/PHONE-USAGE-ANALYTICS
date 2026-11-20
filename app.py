@@ -426,7 +426,7 @@ with nav_logo:
         <div class="brand-wrap">
             <div class="brand-icon">📱</div>
             <div>
-                <div class="brand-name">$L^2$ $L^2$</div>
+                <div class="brand-name">L<sup>2</sup> Dev</div>
                 <div class="brand-sub">SCREEN &amp; SLEEP ANALYTICS • BY LONG LE</div>
             </div>
         </div>
